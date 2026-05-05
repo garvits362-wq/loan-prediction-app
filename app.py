@@ -2,7 +2,6 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import pickle
-import os
 from PIL import Image
 import matplotlib.pyplot as plt
 
@@ -12,16 +11,10 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="Loan Dashboard", page_icon="💰", layout="wide")
 
 # -------------------------------
-# Load Model & Image
+# Load Model & Image (FIXED)
 # -------------------------------
-BASE_DIR = os.getcwd()
-model_path = os.path.join(BASE_DIR, "Model", "ML_Model1.pkl")
-image_path = os.path.join(BASE_DIR, "bank.png")
-
-with open(model_path, "rb") as f:
-    model = pickle.load(f)
-
-image = Image.open(image_path)
+model = pickle.load(open("Model/ML_Model1.pkl", "rb"))
+image = Image.open("bank.png")
 
 # -------------------------------
 # Header
@@ -189,9 +182,6 @@ if st.button("🔍 Analyze Application"):
 
     input_data = preprocess()
 
-    # -------------------------------
-    # 🔥 FINAL FIX: Credit Rule Applied
-    # -------------------------------
     if credit_history == 0.0:
         prediction = 0
         prob = 0.05
@@ -202,13 +192,11 @@ if st.button("🔍 Analyze Application"):
     st.markdown("---")
     st.subheader(f"📄 Application Summary - {name}")
 
-    # Result
     if prediction == 1:
         st.success("✅ Loan Approved")
     else:
         st.error("❌ Loan Rejected")
 
-    # Special message
     if credit_history == 0.0:
         st.warning("⚠️ Rejected due to poor credit history")
 
@@ -218,17 +206,14 @@ if st.button("🔍 Analyze Application"):
         st.markdown("### 👥 Co-Applicant")
         st.write(f"{co_name} ({relationship})")
 
-    # Probability
     st.subheader("📊 Approval Probability")
     st.progress(int(prob * 100))
     st.write(f"{prob*100:.2f}% chance")
 
-    # EMI
     st.subheader("💰 EMI")
     emi = calculate_emi(loan_amount, interest_rate, loan_term)
     st.info(f"₹{int(emi):,} per month")
 
-    # Eligible Loan
     st.subheader("💡 Eligible Loan")
     eligible = get_max_eligible_loan(model, input_data)
 
@@ -237,9 +222,6 @@ if st.button("🔍 Analyze Application"):
     else:
         st.success(f"Up to ₹{int(eligible * 10):,}")
 
-    # -------------------------------
-    # Graphs
-    # -------------------------------
     st.subheader("📊 Insights")
 
     impact_df = get_feature_impact(model, input_data)
@@ -267,7 +249,6 @@ if st.button("🔍 Analyze Application"):
         ax2.set_title("Financial Load")
         st.pyplot(fig2)
 
-    # Rejection reasons
     if prediction == 0:
         st.subheader("❗ Top Reasons")
 
